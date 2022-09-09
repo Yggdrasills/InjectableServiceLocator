@@ -1,0 +1,25 @@
+{
+  "name": "com.yggdrasills.injectableservicelocator",
+  "version": "1.0.0",
+  "displayName": "Injectable Service Locator",
+  "description": "Service Locator for MonoBehaviour based on code generation",
+  "unity": "2019.4",
+  "keywords": [  
+    "servicelocator",
+    "service-locator",
+    "service locator",
+    "codegeneration",
+    "code generation",
+    "code-generation",
+	"unity",
+	"il",
+	"unity-il",
+	"unity il",
+    "unity service locator",
+    "unity-service-locator"
+  ],
+  "author": {
+    "name": "Yggdrasills",
+    "url": "https://github.com/Yggdrasills/InjectableServiceLocator"
+  }
+}
