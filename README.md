@@ -45,6 +45,8 @@ public class DemoClass : MonoBehaviour
 }
 ```
 
+3. And don't forget to add ServiceLocator component to the scene
+
 Notes
 ---
 1. :small_red_triangle_down: This repository is for educational purposes only and is not recommended for commercial use, because contains a lot of uncovered injection cases.
