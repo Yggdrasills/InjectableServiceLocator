@@ -1,6 +1,7 @@
 using InjectableServiceLocator.Services.Attributes;
 
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace InjectableServiceLocator.Demo
 {
@@ -9,12 +10,21 @@ namespace InjectableServiceLocator.Demo
         [Inject]
         private DemoService _service;
 
-        private void Update()
+        [SerializeField]
+        private Button _tapButton;
+
+        private int _tapCount;
+
+        private void Start()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                _service.Display();
-            }
+            _tapButton.onClick.AddListener(Display);
+        }
+
+        private void Display()
+        {
+            _tapCount++;
+
+            _tapButton.GetComponentInChildren<Text>().text += _tapCount + " ";
         }
     }
 }
