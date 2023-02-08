@@ -1,7 +1,9 @@
 {
-    "name": "InjectableServiceLocator",
+    "name": "Example",
     "rootNamespace": "",
-    "references": [],
+    "references": [
+        "GUID:1d6d9f1db2e47ed41a060a58eed6f2d6"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
