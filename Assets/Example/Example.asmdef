@@ -1,20 +1,16 @@
 {
-    "name": "InjectableServiceLocator.Editor",
+    "name": "Example",
     "rootNamespace": "",
     "references": [
-        "InjectableServiceLocator"
+        "GUID:1d6d9f1db2e47ed41a060a58eed6f2d6"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [
-        "SL_LOG_ENABLED"
-    ],
+    "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false
 }

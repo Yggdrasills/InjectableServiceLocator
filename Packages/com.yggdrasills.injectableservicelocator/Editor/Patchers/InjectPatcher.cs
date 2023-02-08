@@ -10,15 +10,28 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
+using Unity.CompilationPipeline.Common.ILPostProcessing;
+
 using ICustomAttributeProvider = Mono.Cecil.ICustomAttributeProvider;
 
 namespace InjectableServiceLocator.Editor.Patchers
 {
-    public class InjectPatcher : IPatcher
+    internal class InjectPatcher : IPatcher
     {
-        public void ApplyPatch(ModuleDefinition moduleDefinition, Assembly assemblyDefinition)
+        private readonly ModuleDefinition _module;
+        private readonly ICompiledAssembly _compiledAssembly;
+
+        internal InjectPatcher(ModuleDefinition module, ICompiledAssembly compiledAssembly)
         {
-            foreach (var type in moduleDefinition.Types)
+            _module = module;
+            _compiledAssembly = compiledAssembly;
+        }
+
+        void IPatcher.ApplyPatch()
+        {
+            var assemblyDefinition = Assembly.Load(_compiledAssembly.InMemoryAssembly.PeData);
+
+            foreach (var type in _module.Types)
             {
                 foreach (var field in type.Fields)
                 {
@@ -29,7 +42,7 @@ namespace InjectableServiceLocator.Editor.Patchers
 
                     var setFieldInstruction = Instruction.Create(OpCodes.Stfld, field);
 
-                    ApplyPatch("Start", moduleDefinition, type.Methods, "Get", assemblyType, setFieldInstruction);
+                    ApplyPatch("Start", _module, type.Methods, "Get", assemblyType, setFieldInstruction);
                 }
             }
         }
@@ -53,15 +66,17 @@ namespace InjectableServiceLocator.Editor.Patchers
             var resolveGenericMethod = typeof(ServiceLocator).GetMethod(serviceLocatorMethod);
 
             var ilProcessor = Utilities.GetOrCreateMethodProcessor(methodName,
-                moduleDefinition.TypeSystem.Void, methods)
+                    moduleDefinition.TypeSystem.Void, methods)
                 .Body.GetILProcessor();
 
             var processorInstruction = ilProcessor.Body.Instructions[0];
             var genericMethod = resolveGenericMethod?.MakeGenericMethod(assemblyType);
 
             var loadArg = Instruction.Create(OpCodes.Ldarg_0);
-            var callInstanceInstruction = Instruction.Create(OpCodes.Call, moduleDefinition.ImportReference(getInstanceMethod));
-            var virtualInstruction = Instruction.Create(OpCodes.Callvirt, moduleDefinition.ImportReference(genericMethod));
+            var callInstanceInstruction =
+                Instruction.Create(OpCodes.Call, moduleDefinition.ImportReference(getInstanceMethod));
+            var virtualInstruction =
+                Instruction.Create(OpCodes.Callvirt, moduleDefinition.ImportReference(genericMethod));
 
             ilProcessor.InsertBefore(processorInstruction, loadArg);
             ilProcessor.InsertBefore(processorInstruction, callInstanceInstruction);

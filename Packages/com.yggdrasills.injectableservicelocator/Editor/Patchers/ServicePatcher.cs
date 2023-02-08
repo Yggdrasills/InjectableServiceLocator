@@ -10,20 +10,33 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using Mono.Collections.Generic;
 
+using Unity.CompilationPipeline.Common.ILPostProcessing;
+
 namespace InjectableServiceLocator.Editor.Patchers
 {
-    public class ServicePatcher : IPatcher
+    internal class ServicePatcher : IPatcher
     {
-        public void ApplyPatch(ModuleDefinition moduleDefinition, Assembly assemblyDefinition)
+        private readonly ModuleDefinition _module;
+        private readonly ICompiledAssembly _compiledAssembly;
+
+        internal ServicePatcher(ModuleDefinition module, ICompiledAssembly compiledAssembly)
         {
-            foreach (var type in moduleDefinition.Types)
+            _module = module;
+            _compiledAssembly = compiledAssembly;
+        }
+
+        void IPatcher.ApplyPatch()
+        {
+            var assemblyDefinition = Assembly.Load(_compiledAssembly.InMemoryAssembly.PeData);
+
+            foreach (var type in _module.Types)
             {
                 var assemblyType = assemblyDefinition.GetType(type.FullName);
 
                 if (!HasServiceAttribute(type, assemblyType))
                     continue;
 
-                ApplyPatch(type, moduleDefinition, assemblyType);
+                ApplyPatch(type, _module, assemblyType);
             }
         }
 
@@ -53,14 +66,16 @@ namespace InjectableServiceLocator.Editor.Patchers
             var targetMethod = typeof(ServiceLocator).GetMethod(serviceLocatorMethod);
 
             var ilProcessor = Utilities.GetOrCreateMethodProcessor(methodName,
-                   moduleDefinition.TypeSystem.Void, methods)
-                   .Body.GetILProcessor();
+                    moduleDefinition.TypeSystem.Void, methods)
+                .Body.GetILProcessor();
 
             var processorInstruction = ilProcessor.Body.Instructions[0]; // set to [1] to pass NOP instruction
             var genericMethod = targetMethod?.MakeGenericMethod(assemblyType);
 
-            var callInstanceInstruction = Instruction.Create(OpCodes.Call, moduleDefinition.ImportReference(getSingletonMethod));
-            var virtualInstruction = Instruction.Create(OpCodes.Callvirt, moduleDefinition.ImportReference(genericMethod));
+            var callInstanceInstruction =
+                Instruction.Create(OpCodes.Call, moduleDefinition.ImportReference(getSingletonMethod));
+            var virtualInstruction =
+                Instruction.Create(OpCodes.Callvirt, moduleDefinition.ImportReference(genericMethod));
 
             ilProcessor.InsertBefore(processorInstruction, callInstanceInstruction);
 
